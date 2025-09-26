@@ -1,24 +1,53 @@
-[index.html](https://github.com/user-attachments/files/22558934/index.html)
 <!DOCTYPE html>
 <html lang="cs">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>AI Učitel pro Honzíka</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;max-width:720px;margin:40px auto;padding:0 16px;line-height:1.6}
+    h1{margin-bottom:8px}
+    .row{display:flex;gap:8px;margin:12px 0}
+    input{flex:1;padding:10px 12px;font-size:16px}
+    button{padding:10px 14px;font-size:16px;cursor:pointer}
+    #out{white-space:pre-wrap;background:#f6f7f9;border:1px solid #e4e6eb;border-radius:8px;padding:12px;margin-top:12px;min-height:48px}
+  </style>
 </head>
 <body>
   <h1>AI Učitel pro Honzíka</h1>
-  <p>Aplikace nasazená na Vercelu. Povolit mikrofon a začít mluvit.</p>
+  <p>Aplikace nasazená na Vercelu. Povol mikrofon a začni mluvit.</p>
+
+  <div class="row">
+    <input id="q" placeholder="Zeptej se učitele…" />
+    <button id="ask">Zeptat se</button>
+  </div>
+  <div id="out"></div>
+
   <script>
-    async function ask(question) {
-      const r = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {'Content-Type':'application/json'},
-        body: JSON.stringify({ system: "Jsi přátelský učitel pro 12letého kluka Honzíka.", messages: [{role:'user', content:question}] })
-      });
-      const j = await r.json();
-      alert("Odpověď: " + j.text);
+    const q = document.getElementById('q');
+    const out = document.getElementById('out');
+    document.getElementById('ask').addEventListener('click', run);
+    q.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
+
+    async function run(){
+      const question = q.value.trim() || 'Ahoj učiteli!';
+      out.textContent = '⏳ Přemýšlím…';
+      try{
+        const r = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system: 'Jsi přátelský učitel pro 12letého kluka Honzíka.',
+            messages: [{ role: 'user', content: question }]
+          })
+        });
+        if(!r.ok){ out.textContent = 'Chyba: ' + (await r.text()); return; }
+        const j = await r.json();
+        out.textContent = j.text || '(prázdná odpověď)';
+      }catch(err){
+        out.textContent = 'Chyba připojení: ' + err.message;
+      }
     }
-    ask("Ahoj učiteli!");
   </script>
 </body>
 </html>
