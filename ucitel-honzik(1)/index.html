@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Učitel pro Honzíka</title>
+</head>
+<body>
+  <h1>AI Učitel pro Honzíka</h1>
+  <p>Aplikace nasazená na Vercelu. Povolit mikrofon a začít mluvit.</p>
+  <script>
+    async function ask(question) {
+      const r = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ system: "Jsi přátelský učitel pro 12letého kluka Honzíka.", messages: [{role:'user', content:question}] })
+      });
+      const j = await r.json();
+      alert("Odpověď: " + j.text);
+    }
+    ask("Ahoj učiteli!");
+  </script>
+</body>
+</html>
